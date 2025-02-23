@@ -120,7 +120,7 @@ void leftForward(){
 
 void leftBackward(){
   runMotor( IN4, IN3, ENB, speed );
-  runMotor( IN7, IN6, END, speed );
+  runMotor( IN7, IN8, END, speed );
 }
 
 void runMotor( uint8_t highPin, uint8_t lowPin, uint8_t enablePin, uint8_t speed ){
