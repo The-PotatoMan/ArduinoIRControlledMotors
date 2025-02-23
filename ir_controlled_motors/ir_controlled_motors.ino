@@ -71,6 +71,8 @@ void loop() {
       //copy this for the other motor
       stopMotor(IN1, IN2, ENA );
       stopMotor(IN3, IN4, ENB );
+      stopMotor(IN5, IN6, ENC );
+      stopMotor(IN7, IN8, END );
       break;
     case 0x43:
       //right motors reverse
