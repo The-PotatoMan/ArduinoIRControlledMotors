@@ -64,6 +64,8 @@ void loop() {
     case 0x15:
       //run all motors backwards
       //Serial.println("reverse");
+      rightBackward();
+      leftBackward();
       break;
     case 0x40: 
       //stop all motors
@@ -76,54 +78,49 @@ void loop() {
       break;
     case 0x43:
       //right motors reverse
+      rightBackward();
       //left motors forward
+      leftForward();
       //Serial.println("right");
       break;
     case 0x44:
       //right motors forward
+      rightForward();
       //left motors reverse
+      leftBackward();
       //Serial.println("left");
       break;
     case 0x46:
       //all motors forward
       //copy this for the other motor
-      runMotor( IN2, IN1, ENA, speed );
-      runMotor( IN3, IN4, ENB, speed );
-      runMotor( IN6, IN5, ENC, speed );
-      runMotor( IN8, IN7, END, speed );
+      rightForward();
+      leftForward();
       //Serial.println("forward");
       break;
-    // case 0x16://1
-    //   setSpeed( 1 );
-    //   break;
-    // case 0x19://2
-    // setSpeed( 2 );
-    //   break;
-    // case 0xD://3
-    //   setSpeed( 3 );
-    //   break;
-    // case 0xC://4
-    //   setSpeed( 4 );
-    //   break;
-    // case 0x18://5
-    //   setSpeed( 5 );
-    //   break;
-    // case 0x5E://6
-    //   setSpeed( 6 );
-    //   break;
-    // case 0x8://7
-    //   setSpeed( 7 );
-    //   break;
-    // case 0x1C://8
-    //   setSpeed( 8 );
-    //   break;
-    // case 0x5A://9
-    //   setSpeed( 9 );
-    //   break;
     default:
       // Serial.println( cmd, HEX );
       break;
   }
+}
+
+void rightForward(){
+  runMotor( IN2, IN1, ENA, speed );
+  runMotor( IN6, IN5, ENC, speed );
+}
+
+void rightBackward(){
+  runMotor( IN1, IN2, ENA, speed );
+  runMotor( IN5, IN6, ENC, speed );
+}
+
+void leftForward(){
+  runMotor( IN3, IN4, ENB, speed );
+  runMotor( IN8, IN7, END, speed );
+}
+
+void leftBackward(){
+  runMotor( IN4, IN3, ENB, speed );
+  runMotor( IN7, IN6, END, speed );
 }
 
 void runMotor( uint8_t highPin, uint8_t lowPin, uint8_t enablePin, uint8_t speed ){
