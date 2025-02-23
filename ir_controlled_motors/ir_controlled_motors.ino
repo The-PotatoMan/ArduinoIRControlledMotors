@@ -38,11 +38,11 @@ uint8_t speed = 255;  //0-255
 constexpr uint16_t S1 = 0x38;  // Taste 5
 
 void setup() {
-  Serial.begin(9600);
+  //Serial.begin(9600);
 
   IrReceiver.begin(RECV_PIN);
-  Serial.print(F("Ready to receive IR signals at pin "));
-  Serial.println(RECV_PIN);
+  //Serial.print(F("Ready to receive IR signals at pin "));
+  //Serial.println(RECV_PIN);
 //copy the pinMode for the new pins created above
   pinMode( ENA, OUTPUT );
   pinMode( IN1, OUTPUT );
@@ -63,11 +63,11 @@ void loop() {
   switch (cmd) {
     case 0x15:
       //run all motors backwards
-      Serial.println("reverse");
+      //Serial.println("reverse");
       break;
     case 0x40: 
       //stop all motors
-      Serial.println("stop");
+      //Serial.println("stop");
       //copy this for the other motor
       stopMotor(IN1, IN2, ENA );
       stopMotor(IN3, IN4, ENB );
@@ -77,19 +77,21 @@ void loop() {
     case 0x43:
       //right motors reverse
       //left motors forward
-      Serial.println("right");
+      //Serial.println("right");
       break;
     case 0x44:
       //right motors forward
       //left motors reverse
-      Serial.println("left");
+      //Serial.println("left");
       break;
     case 0x46:
       //all motors forward
       //copy this for the other motor
-      runMotor( IN1, IN2, ENA, speed );
+      runMotor( IN2, IN1, ENA, speed );
       runMotor( IN3, IN4, ENB, speed );
-      Serial.println("forward");
+      runMotor( IN6, IN5, ENC, speed );
+      runMotor( IN8, IN7, END, speed );
+      //Serial.println("forward");
       break;
     // case 0x16://1
     //   setSpeed( 1 );
@@ -142,7 +144,7 @@ uint16_t irReceive() {
   if (IrReceiver.decode()) {
     if (IrReceiver.decodedIRData.protocol == NEC) {
       received = IrReceiver.decodedIRData.command;
-      Serial.println( received, HEX );
+      //Serial.println( received, HEX );
     }
     IrReceiver.resume();
   }
