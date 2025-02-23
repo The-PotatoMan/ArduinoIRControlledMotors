@@ -6,7 +6,7 @@
 #define DECODE_NEC       // DECODE_NEC
 #include <IRremote.hpp>  // Do not change header order.
 
-constexpr uint8_t RECV_PIN{ 7 };
+constexpr uint8_t RECV_PIN{ 0 };
 
 /*
  *  motor pins
@@ -14,13 +14,24 @@ constexpr uint8_t RECV_PIN{ 7 };
  * IN1 and IN2 determin which direction the motor spins
  * Copy these pins and change their names and which pins the other controller is connected to
  */
-constexpr uint8_t ENA{ 9 };
-constexpr uint8_t IN1{ 10 };
-constexpr uint8_t IN2{ 11 };
+constexpr uint8_t ENA{ 5 };
+constexpr uint8_t IN1{ 7 };
+constexpr uint8_t IN2{ 6 };
 
 constexpr uint8_t ENB{ 3 };
-constexpr uint8_t IN3{ 2 };
-constexpr uint8_t IN4{ 4 };
+constexpr uint8_t IN3{ 4 };
+constexpr uint8_t IN4{ 2 };
+
+constexpr uint8_t ENC{ 11 };
+constexpr uint8_t IN5{ 13 };
+constexpr uint8_t IN6{ 12 };
+
+constexpr uint8_t END{ 9 };
+constexpr uint8_t IN7{ 10 };
+constexpr uint8_t IN8{ 8 };
+
+
+
 
 uint8_t speed = 255;  //0-255
 
