@@ -14,23 +14,23 @@ constexpr uint8_t RECV_PIN{ 0 };
  * IN1 and IN2 determin which direction the motor spins
  * Copy these pins and change their names and which pins the other controller is connected to
  */
+
+ //front right
 constexpr uint8_t ENA{ 5 };
 constexpr uint8_t IN1{ 7 };
 constexpr uint8_t IN2{ 6 };
-
+//front left
 constexpr uint8_t ENB{ 3 };
 constexpr uint8_t IN3{ 4 };
 constexpr uint8_t IN4{ 2 };
-
+//rear right
 constexpr uint8_t ENC{ 11 };
 constexpr uint8_t IN5{ 13 };
 constexpr uint8_t IN6{ 12 };
-
+//rear left
 constexpr uint8_t END{ 9 };
 constexpr uint8_t IN7{ 10 };
 constexpr uint8_t IN8{ 8 };
-
-
 
 
 uint8_t speed = 255;  //0-255
@@ -50,6 +50,12 @@ void setup() {
   pinMode( ENB, OUTPUT );
   pinMode( IN3, OUTPUT );
   pinMode( IN4, OUTPUT );
+  pinMode( ENC, OUTPUT );
+  pinMode( IN5, OUTPUT );
+  pinMode( IN6, OUTPUT );
+  pinMode( END, OUTPUT );
+  pinMode( IN7, OUTPUT );
+  pinMode( IN8, OUTPUT );
 }
 
 void loop() {
