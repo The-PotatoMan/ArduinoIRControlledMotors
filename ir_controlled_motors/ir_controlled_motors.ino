@@ -1,144 +1,172 @@
-//load 3rd party remote library included with arduino IDE program for uploading to the arduino
+// Load 3rd party remote library included with Arduino IDE for uploading to the Arduino
 #define DECODE_NEC
 #include <IRremote.hpp>
 
-//remote receiver  pin
-constexpr uint8_t RECV_PIN{ 0 };
+// --- Pin Definitions ---
+// Remote receiver pin
+constexpr uint8_t RECV_PIN = 0;
 
 /*
- *  motor pins
- * EN[ABCD] is the pin to determin speed, we only do full speed
- * IN[12345678] determin which direction the motor spins
+ * Motor Pins:
+ * EN[ABCD] are the enable pins for speed control (using PWM).
+ * IN[12345678] are the direction control pins.
  */
-//front right pins
-constexpr uint8_t ENA{ 5 };
-constexpr uint8_t IN1{ 7 };
-constexpr uint8_t IN2{ 6 };
-//front left pins
-constexpr uint8_t ENB{ 3 };
-constexpr uint8_t IN3{ 4 };
-constexpr uint8_t IN4{ 2 };
-//rear right pins
-constexpr uint8_t ENC{ 11 };
-constexpr uint8_t IN5{ 13 };
-constexpr uint8_t IN6{ 12 };
-//rear left pins
-constexpr uint8_t END{ 9 };
-constexpr uint8_t IN7{ 10 };
-constexpr uint8_t IN8{ 8 };
 
-//used but never changed from 255 - ISSUE WITH MOTOR CONTROLLER AT CERTAIN SPEEDS RESULTING IN IR IGNORING COMMANDS
-uint8_t speed = 255;  //0-255
+// Front Right Motor
+constexpr uint8_t FRONT_RIGHT_ENA = 5;
+constexpr uint8_t FRONT_RIGHT_IN1 = 7;
+constexpr uint8_t FRONT_RIGHT_IN2 = 6;
 
+// Front Left Motor
+constexpr uint8_t FRONT_LEFT_ENB = 3;
+constexpr uint8_t FRONT_LEFT_IN3 = 4;
+constexpr uint8_t FRONT_LEFT_IN4 = 2;
+
+// Rear Right Motor
+constexpr uint8_t REAR_RIGHT_ENC = 11;
+constexpr uint8_t REAR_RIGHT_IN5 = 13;
+constexpr uint8_t REAR_RIGHT_IN6 = 12;
+
+// Rear Left Motor
+constexpr uint8_t REAR_LEFT_END = 9;
+constexpr uint8_t REAR_LEFT_IN7 = 10;
+constexpr uint8_t REAR_LEFT_IN8 = 8;
+
+// --- Motor Control Settings ---
+// Speed value (0-255).  Currently fixed at full speed (255).
+// Note: There was a comment mentioning issues at certain speeds.
+uint8_t speed = 255;
+
+// --- Function Prototypes ---
+void setupMotorPins();
+void handleRemoteCommand(uint16_t command);
+void rightForward();
+void rightBackward();
+void leftForward();
+void leftBackward();
+void runMotor(uint8_t highPin, uint8_t lowPin, uint8_t enablePin, uint8_t speed);
+void stopMotor(uint8_t pin1, uint8_t pin2, uint8_t enablePin);
+uint16_t irReceive();
+
+// --- Setup ---
 void setup() {
-  //turn on the remote receiver
+  // Initialize the IR receiver
   IrReceiver.begin(RECV_PIN);
-  //set the gpio pins to output
-  pinMode(ENA, OUTPUT);
-  pinMode(IN1, OUTPUT);
-  pinMode(IN2, OUTPUT);
-  pinMode(ENB, OUTPUT);
-  pinMode(IN3, OUTPUT);
-  pinMode(IN4, OUTPUT);
-  pinMode(ENC, OUTPUT);
-  pinMode(IN5, OUTPUT);
-  pinMode(IN6, OUTPUT);
-  pinMode(END, OUTPUT);
-  pinMode(IN7, OUTPUT);
-  pinMode(IN8, OUTPUT);
+
+  // Set motor control pins as OUTPUT
+  setupMotorPins();
 }
 
+// --- Main Loop ---
 void loop() {
-  //get the command, if any, from the remote control
-  uint16_t cmd = irReceive();
-  //see if we got an actual command from the remote
-  switch (cmd) {
-    case 0x15:
-      //run all motors backwards
-      //Serial.println("reverse");
+  // Get the command from the remote control
+  uint16_t command = irReceive();
+
+  // Process the received command
+  handleRemoteCommand(command);
+}
+
+// --- Function Implementations ---
+
+// Sets the motor pins to OUTPUT mode.
+void setupMotorPins() {
+  pinMode(FRONT_RIGHT_ENA, OUTPUT);
+  pinMode(FRONT_RIGHT_IN1, OUTPUT);
+  pinMode(FRONT_RIGHT_IN2, OUTPUT);
+  pinMode(FRONT_LEFT_ENB, OUTPUT);
+  pinMode(FRONT_LEFT_IN3, OUTPUT);
+  pinMode(FRONT_LEFT_IN4, OUTPUT);
+  pinMode(REAR_RIGHT_ENC, OUTPUT);
+  pinMode(REAR_RIGHT_IN5, OUTPUT);
+  pinMode(REAR_RIGHT_IN6, OUTPUT);
+  pinMode(REAR_LEFT_END, OUTPUT);
+  pinMode(REAR_LEFT_IN7, OUTPUT);
+  pinMode(REAR_LEFT_IN8, OUTPUT);
+}
+// Processes the command received from the remote.
+void handleRemoteCommand(uint16_t command) {
+  switch (command) {
+    case 0x15: // Down button
+      // Run all motors backward
       rightBackward();
       leftBackward();
       break;
-    case 0x40:
-      //stop all motors
-      //Serial.println("stop");
-      //copy this for the other motor
-      stopMotor(IN1, IN2, ENA);
-      stopMotor(IN3, IN4, ENB);
-      stopMotor(IN5, IN6, ENC);
-      stopMotor(IN7, IN8, END);
+    case 0x40: // OK button
+      // Stop all motors
+      stopMotor(FRONT_RIGHT_IN1, FRONT_RIGHT_IN2, FRONT_RIGHT_ENA);
+      stopMotor(FRONT_LEFT_IN3, FRONT_LEFT_IN4, FRONT_LEFT_ENB);
+      stopMotor(REAR_RIGHT_IN5, REAR_RIGHT_IN6, REAR_RIGHT_ENC);
+      stopMotor(REAR_LEFT_IN7, REAR_LEFT_IN8, REAR_LEFT_END);
       break;
-    case 0x43:
-      //right motors reverse
+    case 0x43: // Right button
+      // Right motors backward, left motors forward (turn right)
       rightBackward();
-      //left motors forward
       leftForward();
-      //Serial.println("right");
       break;
-    case 0x44:
-      //right motors forward
+    case 0x44: // Left button
+      // Right motors forward, left motors backward (turn left)
       rightForward();
-      //left motors reverse
       leftBackward();
-      //Serial.println("left");
       break;
-    case 0x46:
-      //all motors forward
-      //copy this for the other motor
+    case 0x46: // Up button
+      // All motors forward
       rightForward();
       leftForward();
-      //Serial.println("forward");
       break;
     default:
-      // Serial.println( cmd, HEX );
+      // Ignore other buttons
       break;
   }
 }
 
+// Move the right motors forward.
 void rightForward() {
-  runMotor(IN2, IN1, ENA, speed);
-  runMotor(IN6, IN5, ENC, speed);
+  runMotor(FRONT_RIGHT_IN2, FRONT_RIGHT_IN1, FRONT_RIGHT_ENA, speed);
+  runMotor(REAR_RIGHT_IN6, REAR_RIGHT_IN5, REAR_RIGHT_ENC, speed);
 }
 
+// Move the right motors backward.
 void rightBackward() {
-  runMotor(IN1, IN2, ENA, speed);
-  runMotor(IN5, IN6, ENC, speed);
+  runMotor(FRONT_RIGHT_IN1, FRONT_RIGHT_IN2, FRONT_RIGHT_ENA, speed);
+  runMotor(REAR_RIGHT_IN5, REAR_RIGHT_IN6, REAR_RIGHT_ENC, speed);
 }
 
+// Move the left motors forward.
 void leftForward() {
-  runMotor(IN3, IN4, ENB, speed);
-  runMotor(IN8, IN7, END, speed);
+  runMotor(FRONT_LEFT_IN3, FRONT_LEFT_IN4, FRONT_LEFT_ENB, speed);
+  runMotor(REAR_LEFT_IN8, REAR_LEFT_IN7, REAR_LEFT_END, speed);
 }
 
+// Move the left motors backward.
 void leftBackward() {
-  runMotor(IN4, IN3, ENB, speed);
-  runMotor(IN7, IN8, END, speed);
+  runMotor(FRONT_LEFT_IN4, FRONT_LEFT_IN3, FRONT_LEFT_ENB, speed);
+  runMotor(REAR_LEFT_IN7, REAR_LEFT_IN8, REAR_LEFT_END, speed);
 }
-//high pin is positive polarity and the low pin is the "ground" pin to determin which direction the motor goes
-//enable pin turns on the motor
-//speed is for future development
+
+// Control a single motor's direction and speed.
+// highPin: Pin that is set HIGH for a specific direction.
+// lowPin: Pin that is set LOW for the same direction.
+// enablePin: Pin used for speed control via Pulse Width Modulation (PWM).
+// speed: Speed value (0-255).
 void runMotor(uint8_t highPin, uint8_t lowPin, uint8_t enablePin, uint8_t speed) {
   digitalWrite(highPin, HIGH);
   digitalWrite(lowPin, LOW);
   analogWrite(enablePin, speed);
 }
 
-//turn all the motors off
+// Stop a single motor.
 void stopMotor(uint8_t pin1, uint8_t pin2, uint8_t enablePin) {
   digitalWrite(pin1, LOW);
   digitalWrite(pin2, LOW);
   analogWrite(enablePin, 0);
 }
 
-//check if there's a code received from the remote
+// Receive and decode an IR command.
 uint16_t irReceive() {
-  uint16_t received{ 0 };
+  uint16_t received = 0;
 
-  //decode the receiver
   if (IrReceiver.decode()) {
-    //check if the code uses the brand remote we have
     if (IrReceiver.decodedIRData.protocol == NEC) {
-      //set the function value to return
       received = IrReceiver.decodedIRData.command;
     }
     IrReceiver.resume();
